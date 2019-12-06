@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-with open('input_2.txt', 'r') as f:
+with open('inputs/input_2.txt', 'r') as f:
     intcode = [int(i) for i in f.read().split(',')]
     
 def opcode_1(a, b):

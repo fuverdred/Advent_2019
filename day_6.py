@@ -1,4 +1,4 @@
-with open('input_6.txt', 'r') as f:
+with open('inputs/input_6.txt', 'r') as f:
     data = [orbit[:-1].split(')') for orbit in f.readlines()] # strip \n
 
 class Orbiting_thing():

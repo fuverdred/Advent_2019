@@ -1,4 +1,4 @@
-with open('input_3.txt', 'r') as f:
+with open('inputs/input_3.txt', 'r') as f:
     wire_1, wire_2 = f.readlines()
 
 def manhatten_distance(x, y):

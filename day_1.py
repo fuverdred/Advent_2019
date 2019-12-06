@@ -1,4 +1,4 @@
-with open('input_1.txt', 'r') as f:
+with open('inputs/input_1.txt', 'r') as f:
     data = [int(line[:-1])  for line in f.readlines()] #  strip \n
 
 def fuel_required(mass):

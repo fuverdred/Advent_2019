@@ -1,4 +1,4 @@
-with open('input_5.txt', 'r') as f:
+with open('inputs/input_5.txt', 'r') as f:
     intcode = [int(i) for i in f.read()[:-1].split(',')]
 
 def opcode_1(memory, index):
