@@ -24,5 +24,4 @@ for pixel in range(LAYER_SIZE):
             break
 img = np.array([int(i) for i in picture]).reshape((HEIGHT, WIDTH))
 
-plt.imshow(img, cmap='gray')
-plt.show()
+
