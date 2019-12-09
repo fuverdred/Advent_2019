@@ -4,6 +4,7 @@ class Intcode_Computer():
         Takes intcode and inputs as a list of integers
         '''
         self.index = 0
+        self.relative_base = 0
         self.memory = intcode
 
         self.inputs = inputs
@@ -16,7 +17,8 @@ class Intcode_Computer():
                         5: self.opcode_5,
                         6: self.opcode_6,
                         7: self.opcode_7,
-                        8: self.opcode_8}
+                        8: self.opcode_8,
+                        9: self.opcode_9}
 
         self.finished = False
 
@@ -28,41 +30,56 @@ class Intcode_Computer():
     def opcode_1(self):
         '''ADD'''
         modes = self.parse_modes(self.memory[self.index])
-        modes[2] = 1 # address for result saved in last value
         values = []
-        for mode in modes:
+        for mode in modes[:2]:
             self.index += 1 # Move to next value to evaluate
             value = self.memory[self.index]
             if mode == 0:
                 value = self.memory[value] #  Position mode
+            if mode == 2:
+                value = self.memory[self.relative_base + value]
             values.append(value)
-        self.memory[values[2]] = values[0] + values[1]
+        self.index += 1 # go to third param
+        value = self.memory[self.index]
+        if modes[2] == 2:
+            self.memory[self.relative_base+value] = values[0]+values[1]
+        else:
+            self.memory[value] = values[0] + values[1]
         self.index += 1 #  Move to next instruction
 
     def opcode_2(self):
         '''MULTIPLY'''
         modes = self.parse_modes(self.memory[self.index])
-        modes[2] = 1 # address for result saved in last value
         values = []
-        for mode in modes:
+        for mode in modes[:2]:
             self.index += 1 # Move to next value to evaluate
             value = self.memory[self.index]
             if mode == 0:
                 value = self.memory[value] #  Position mode
+            if mode == 2:
+                value = self.memory[self.relative_base + value]
             values.append(value)
-        self.memory[values[2]] = values[0] * values[1]
+        self.index += 1 # go to third param
+        value = self.memory[self.index]
+        if modes[2] == 2:
+            self.memory[self.relative_base+value] = values[0] * values[1]
+        else:
+            self.memory[value] = values[0] * values[1]
         self.index += 1 #  Move to next instruction
 
     def opcode_3(self):
         '''INPUT'''
         try:
-            value = self.inputs.pop()
+            value_in = self.inputs.pop()
         except IndexError:
             print("INPUT QUEUE EMPTY")
             return
+        mode = self.parse_modes(self.memory[self.index])[0]
         self.index += 1
-        address = self.memory[self.index]
-        self.memory[address] = value
+        value = self.memory[self.index]
+        if mode == 2:
+            value = self.relative_base + value
+        self.memory[value] = value_in
         self.index += 1 #  Move to next instruction
 
     def opcode_4(self):
@@ -72,6 +89,8 @@ class Intcode_Computer():
         value = self.memory[self.index]
         if mode == 0:
             value = self.memory[value] # Position mode
+        if mode == 2:
+            value = self.memory[self.relative_base + value]
         self.outputs.append(value)
         self.index += 1 #  Move to next instruction
 
@@ -83,8 +102,9 @@ class Intcode_Computer():
             self.index += 1 # move to next value
             value = self.memory[self.index]
             if mode == 0:
-                # position mode
                 value = self.memory[value]
+            if mode == 2:
+                value = self.memory[self.relative_base + value]
             values.append(value)
         if values[0] != 0:
             self.index = values[1] # Jump
@@ -99,8 +119,9 @@ class Intcode_Computer():
             self.index += 1 # move to next value
             value = self.memory[self.index]
             if mode == 0:
-                # position mode
                 value = self.memory[value]
+            if mode == 2:
+                value = self.memory[self.relative_base + value]
             values.append(value)
         if values[0] == 0:
             self.index = values[1] # Jump
@@ -109,36 +130,60 @@ class Intcode_Computer():
 
     def opcode_7(self):
         '''LESS THAN'''
-        modes = self.parse_modes(self.memory[self.index])[:2]+[1]
+        modes = self.parse_modes(self.memory[self.index])
         values = []
-        for mode in modes:
+        for mode in modes[:2]:
             self.index += 1 # move to next value
             value = self.memory[self.index]
             if mode == 0:
-                # position mode
                 value = self.memory[value]
+            if mode == 2:
+                value = self.memory[self.relative_base+value]
             values.append(value)
+        self.index += 1
+        address = self.memory[self.index]
+        if modes[2] == 2:
+            address = self.relative_base + address
+        
         if values[0] < values[1]:
-            self.memory[values[2]] = 1
+            self.memory[address] = 1
         else:
-            self.memory[values[2]] = 0
+            self.memory[address] = 0
         self.index += 1 # Move to next instruction
 
     def opcode_8(self):
         '''EQUAL'''
-        modes = self.parse_modes(self.memory[self.index])[:2]+[1]
+        modes = self.parse_modes(self.memory[self.index])
         values = []
-        for mode in modes:
+        for mode in modes[:2]:
             self.index += 1 # move to next value
             value = self.memory[self.index]
             if mode == 0:
-                # position mode
                 value = self.memory[value]
+            if mode == 2:
+                value = self.memory[self.relative_base+value]
             values.append(value)
+        self.index += 1
+        address = self.memory[self.index]
+        if modes[2] == 2:
+            address = self.relative_base + address
+        
         if values[0] == values[1]:
-            self.memory[values[2]] = 1
+            self.memory[address] = 1
         else:
-            self.memory[values[2]] = 0
+            self.memory[address] = 0
+        self.index += 1 # Move to next instruction
+
+    def opcode_9(self):
+        '''ADJUST RELATIVE BASE'''
+        mode = self.parse_modes(self.memory[self.index])[0]
+        self.index += 1
+        value = self.memory[self.index]
+        if mode == 0:
+            value = self.memory[value]
+        if mode == 2:
+            value = self.memory[self.relative_base + value]
+        self.relative_base += value
         self.index += 1 # Move to next instruction
 
     def run_code(self):
@@ -148,8 +193,8 @@ class Intcode_Computer():
                 self.finished = True
                 return
             self.opcodes[op]() # execute the instruction
-            if self.outputs != []:
-                return self.outputs.pop()
+##            if self.outputs != []:
+##                return self.outputs.pop()
             
         
     
