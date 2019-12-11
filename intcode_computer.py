@@ -72,7 +72,6 @@ class Intcode_Computer():
         try:
             value_in = self.inputs.pop()
         except IndexError:
-            print("INPUT QUEUE EMPTY")
             return
         mode = self.parse_modes(self.memory[self.index])[0]
         self.index += 1
@@ -193,8 +192,8 @@ class Intcode_Computer():
                 self.finished = True
                 return
             self.opcodes[op]() # execute the instruction
-##            if self.outputs != []:
-##                return self.outputs.pop()
+            if len(self.outputs) == 2:
+                return self.outputs
             
         
     
