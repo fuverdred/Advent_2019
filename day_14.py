@@ -62,10 +62,7 @@ def extract_ingredient(ingredient):
 def recursive(output, amount_req=1, ore=0):
     index = outputs.index(output) # All lists stay in the same order
     amount = output_counts[index] # The amount produced in one reaction
-    multiplier = 0
-    while (multiplier*amount) + leftovers[output] < amount_req:
-        # See if we can use leftovers from another reaction to help this one
-        multiplier += 1
+    multiplier = math.ceil((amount_req - leftovers[output]) / amount) # multiplier shouldn't be neg
     leftovers[output] = (multiplier*amount)+leftovers[output]-amount_req
     
     for ingredient in recipes[index].split(','):
@@ -93,6 +90,17 @@ recipes, outputs = zip(*values)
 output_counts, outputs = zip(*[extract_ingredient(output) for output in outputs])
 
 leftovers = defaultdict(int)
-ore_amount = recursive('FUEL', 1000000)
-print(1000000000000/ore_amount)
-    
+ore_amount = recursive('FUEL', 1)
+print(f'Part 1: {ore_amount} ore required')
+
+# Part 2
+fuel = 2
+ORE = 1E12
+
+while 1:
+    leftovers = defaultdict(int)
+    required = recursive('FUEL', fuel)
+    if required > ORE:
+        break
+    fuel = max((fuel * ORE // required, fuel)) + 1
+print(fuel-1)
