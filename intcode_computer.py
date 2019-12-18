@@ -192,8 +192,8 @@ class Intcode_Computer():
                 self.finished = True
                 return
             self.opcodes[op]() # execute the instruction
-            if self.outputs != []:
-                return self.outputs.pop()
+##            if self.outputs != []:
+##                return self.outputs.pop()
             
         
     
