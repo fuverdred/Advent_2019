@@ -73,15 +73,33 @@ def path_find(scaffold):
             else:
                 direction = (direction-1)%4
                 instructions += 'R,'
-    instructions += str(traverse)+',L,6,' # add the last bit
+    instructions += str(traverse) + ',' # add the last comma for matching
     return instructions
 
-
+def routine_find(text, depth=0):
+    for i in range(5,21):
+        sub = re.compile(text[:i])
+        if sub.pattern=='' or sub.pattern[-1] != ',':
+            continue
+        print(sub.pattern)
+        text = ''.join(re.split(sub, text))
+        if depth == 2:
+            if text == '':
+                return sub.pattern
+        else:
+            result = routine_find(text, depth+1)
+            if result is not None:
+                result = f'{result} {sub.pattern}'
+                if depth == 0:
+                    y = main_routine(text, *result.split())
+                else:
+                    return result
+                                    
+        
 
 def main_routine(instructions, A, B, C):
     routines = {'A': A, 'B': B, 'C': C}
     routine_string = ''
-    count = [0]
     while instructions:
         for routine in routines.keys():
             if routines[routine] == instructions[:len(routines[routine])]:
@@ -96,16 +114,17 @@ def main_routine(instructions, A, B, C):
 ## Part 2
 instructions = path_find(scaffold)
 
-A = 'L,6,L,4,R,12,L,6'
-B = 'R,12,R,12,L,8'
-C = 'L,10,L,10,L,6,L,6'
+A = 'L,6,L,4,R,12'
+B = 'L,6,R,12,R,12,L,8'
+C = 'L,6,L,10,L,10,L,6'
 #routine = main_routine(instructions, A, B, C)
 routine = 'A,B,A,C,B,A,C,B,A,C'
 
-def convert_to_ascii(routine):
-    return [ord(i) if i.isalpha() else int(i)
-            for i in routine.split(',')] + [10]
+def asciify(x):
+    return [ord(i) for i in x] + [10]
 
 intcode[0] = 2
 computer = Intcode_Computer(intcode+[0]*10000, [])
-
+computer.inputs += [10, ord('n')]
+for i in (C, B, A, routine):
+    computer.inputs += asciify(i)[::-1]

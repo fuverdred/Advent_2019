@@ -69,7 +69,6 @@ class Intcode_Computer():
 
     def opcode_3(self):
         '''INPUT'''
-        print("Input pls")
         try:
             value_in = self.inputs.pop()
         except IndexError:
