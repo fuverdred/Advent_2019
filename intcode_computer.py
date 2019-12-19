@@ -69,6 +69,7 @@ class Intcode_Computer():
 
     def opcode_3(self):
         '''INPUT'''
+        print("Input pls")
         try:
             value_in = self.inputs.pop()
         except IndexError:
@@ -194,8 +195,3 @@ class Intcode_Computer():
             self.opcodes[op]() # execute the instruction
 ##            if self.outputs != []:
 ##                return self.outputs.pop()
-            
-        
-    
-            
-        
